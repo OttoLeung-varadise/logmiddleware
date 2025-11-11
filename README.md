@@ -14,39 +14,41 @@ go get github.com/OttoLeung-varadise/logmiddleware
 1. You Should make sure your database is power by PostgreSQL 16+.
 2. Create a database : **request-log** into your .
 3. Run this Schume to create the log's table.
-     ```SQL
+    ```SQL
      -- DROP SCHEMA public;
 
         CREATE SCHEMA public AUTHORIZATION pg_database_owner;
 
-    -- public.request_logs definition
+     -- public.request_logs definition
 
-    -- Drop table
+     -- Drop table
 
-    -- DROP TABLE public.request_logs;
+     DROP TABLE public.request_logs;
 
-        CREATE TABLE public.request_logs (
-            id serial4 NOT NULL,
-            request_id varchar(64) NOT NULL,
-            "method" varchar(10) NOT NULL,
-            "path" varchar(255) NOT NULL,
-            "service_name" varchar(255) NULL,
-            query_string text NULL,
-            status_code int8 NOT NULL,
-            remote_ip varchar(45) NOT NULL,
-            user_agent text NULL,
-            request_time numeric NOT NULL,
-            created_at timestamptz DEFAULT now() NOT NULL,
-            file_name varchar(255) NULL,
-            file_size int8 NULL,
-            content_type varchar(45) NULL,
-            content_json jsonb NULL,
-            CONSTRAINT request_logs_pkey PRIMARY KEY (id)
-        );
-        CREATE INDEX idx_request_logs_created_at ON public.request_logs USING btree (created_at);
-        CREATE INDEX idx_request_logs_path ON public.request_logs USING btree (path);
-        CREATE INDEX idx_request_logs_request_id ON public.request_logs USING btree (request_id);
-     ```
+     CREATE TABLE public.request_logs (
+        id serial4 NOT NULL,
+        request_id varchar(64) NOT NULL,
+        "method" varchar(10) NOT NULL,
+        "path" varchar(255) NOT NULL,
+        query_string text NULL,
+        status_code int8 NOT NULL,
+        remote_ip varchar(45) NOT NULL,
+        user_agent text NULL,
+        request_time numeric NOT NULL,
+        created_at timestamptz DEFAULT now() NOT NULL,
+        file_name varchar(255) NULL,
+        file_size int8 NULL,
+        file_content_json jsonb NULL,
+        service_name varchar(255) NULL,
+        content_type varchar(45) NOT NULL,
+        content_json jsonb NULL,
+        CONSTRAINT request_logs_pkey PRIMARY KEY (id)
+     );
+     CREATE INDEX idx_request_logs_created_at ON public.request_logs USING btree (created_at);
+     CREATE INDEX idx_request_logs_path ON public.request_logs USING btree (path);
+     CREATE INDEX idx_request_logs_request_id ON public.request_logs USING btree (request_id);
+     CREATE INDEX idx_request_logs_service_name ON public.request_logs USING btree (service_name);
+    ```
 
 ## How to Use
 
