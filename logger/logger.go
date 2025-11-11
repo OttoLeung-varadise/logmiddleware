@@ -57,7 +57,8 @@ func RequestLogMiddleware() gin.HandlerFunc {
 		)
 		contentType = c.ContentType()
 
-		if c.ContentType() == "multipart/form-data" {
+		switch contentType {
+		case "multipart/form-data":
 			c.Request.ParseMultipartForm(100 << 20)
 			file, handler, err := c.Request.FormFile("file")
 			if err == nil && file != nil {
@@ -74,7 +75,7 @@ func RequestLogMiddleware() gin.HandlerFunc {
 					fileContent = []byte("file too large, skip content")
 				}
 			}
-		} else if c.ContentType() == "application/json" {
+		case "application/json":
 			fileContent, _ = io.ReadAll(c.Request.Body)
 		}
 
