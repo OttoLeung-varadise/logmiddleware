@@ -52,7 +52,7 @@ func RequestLogMiddleware() gin.HandlerFunc {
 		var (
 			fileName    string
 			fileSize    int64
-			fileContent []byte
+			content     []byte
 			contentType string
 		)
 		contentType = c.ContentType()
@@ -67,16 +67,16 @@ func RequestLogMiddleware() gin.HandlerFunc {
 				fileSize = handler.Size
 
 				if fileSize > 0 && fileSize <= 100*1024*1024 {
-					fileContent, err = io.ReadAll(file)
+					content, err = io.ReadAll(file)
 					if err != nil {
-						fileContent = []byte(fmt.Sprintf("read file error: %v", err))
+						content = []byte(fmt.Sprintf("read file error: %v", err))
 					}
 				} else {
-					fileContent = []byte("file too large, skip content")
+					content = []byte("file too large, skip content")
 				}
 			}
 		case "application/json":
-			fileContent, _ = io.ReadAll(c.Request.Body)
+			content, _ = io.ReadAll(c.Request.Body)
 		}
 
 		c.Next()
@@ -119,7 +119,7 @@ func RequestLogMiddleware() gin.HandlerFunc {
 			case logQueue <- reqLog:
 			default:
 			}
-		}(reqLog, fileContent)
+		}(reqLog, content)
 	}
 }
 
