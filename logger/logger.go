@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -95,6 +96,7 @@ func RequestLogMiddleware(pathFilter []string) gin.HandlerFunc {
 		case "application/json":
 			body := c.Request.Body
 			content, _ = io.ReadAll(body)
+			c.Request.Body = io.NopCloser(bytes.NewReader(content))
 		}
 
 		c.Next()
