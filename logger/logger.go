@@ -93,7 +93,8 @@ func RequestLogMiddleware(pathFilter []string) gin.HandlerFunc {
 				}
 			}
 		case "application/json":
-			content, _ = io.ReadAll(c.Request.Body)
+			body := c.Request.Body
+			content, _ = io.ReadAll(body)
 		}
 
 		c.Next()
