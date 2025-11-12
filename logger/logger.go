@@ -13,7 +13,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var logQueue = make(chan model.RequestLog, 10000)
+var (
+	logQueue           = make(chan model.RequestLog, 10000)
+	serviceName string = ""
+)
 
 func StartLogWriter(db *gorm.DB) {
 	const (
@@ -44,8 +47,22 @@ func StartLogWriter(db *gorm.DB) {
 	}
 }
 
-func RequestLogMiddleware() gin.HandlerFunc {
+func RequestLogMiddleware(pathFilter []string) gin.HandlerFunc {
+
 	return func(c *gin.Context) {
+
+		if filterLen := len(pathFilter); filterLen > 0 {
+			m := make(map[string]struct{}, filterLen)
+			for _, s := range pathFilter {
+				m[s] = struct{}{}
+			}
+
+			if _, exists := m[c.Request.URL.Path]; exists {
+				c.Next() // 路径在过滤器中，继续后续处理
+				return
+			}
+		}
+
 		start := time.Now()
 		reqID := uuid.New().String()
 		c.Set("request_id", reqID)
@@ -83,7 +100,7 @@ func RequestLogMiddleware() gin.HandlerFunc {
 
 		reqLog := model.RequestLog{
 			RequestID:   reqID,
-			ServiceName: getServiceName(),
+			ServiceName: serviceName,
 			Method:      c.Request.Method,
 			Path:        c.Request.URL.Path,
 			QueryString: c.Request.URL.RawQuery,
@@ -127,6 +144,6 @@ func writeBatchWithGORM(db *gorm.DB, logs []model.RequestLog) error {
 	return db.CreateInBatches(logs, len(logs)).Error
 }
 
-func getServiceName() string {
-	return ""
+func SetServiceName(name string) {
+	serviceName = name
 }
