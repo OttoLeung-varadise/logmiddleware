@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/OttoLeung-varadise/logmiddleware/model"
@@ -53,13 +54,21 @@ func RequestLogMiddleware(pathFilter []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		if filterLen := len(pathFilter); filterLen > 0 {
+			path := c.Request.URL.Path
 			m := make(map[string]struct{}, filterLen)
 			for _, s := range pathFilter {
 				m[s] = struct{}{}
+				if strings.HasSuffix(s, "/*") {
+					prefix := strings.TrimSuffix(s, "/*")
+					if strings.HasPrefix(path, prefix) || path == prefix {
+						c.Next()
+						return
+					}
+				}
 			}
 
-			if _, exists := m[c.Request.URL.Path]; exists {
-				c.Next() // 路径在过滤器中，继续后续处理
+			if _, exists := m[path]; exists {
+				c.Next()
 				return
 			}
 		}
